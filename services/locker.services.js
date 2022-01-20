@@ -1,4 +1,5 @@
 var mqtt = require('mqtt');
+const db =require("../mongo");
 
 
 const service = {
@@ -10,26 +11,28 @@ const service = {
             password:"public"
         });
 
-            var ssd1406topic = `${client.options.username}${topic}`;
+            var ssd1406topic = topic;
             var ssd1306topic = `${client.options.username}/locker/ssd1306`;
             
             console.log(ssd1406topic)
             client.on('connect',function(){
                 console.log('connected');
 
+
                 client.subscribe(ssd1406topic,function(err){
                 if(!err){
                     console.log('subscribed');
 
-                    client.publish(ssd1306topic, "unlock");
-                    res.status(200);
+                     client.publish(ssd1406topic,"unlocked1");
+                     res.status(200);
                 }
                 
             })
             });
             client.on('message',function(topic,message){
             console.log(message.toString());
-            message="";
+            const status=message.toString();
+            db.lockerData.findOneAndUpdate({name:req.body.name},{$set:{status:status}});
             })
             res.end();
         } catch (error) {
@@ -37,7 +40,26 @@ const service = {
             res.sendstatus(500)
         }
     },
+  async newLocker(req,res){
+    try{
+    const user = await db.lockerData.findOne({name:req.body.name});
+    if(user)return res.status(400).send({error:"locker already exist"})
+    await db.lockerData.insertOne(req.body);
+    res.send({message:"locker added successfully"})
 
+  }catch(err){
+    res.status(500)
+  }
+},
+async lockerdata(req,res){
+    try{
+    const data=await db.lockerData.find().toArray();
+    res.status(200).send(data);
+
+  }catch(err){
+    res.status(500)
+  }
+}
 }
 
 module.exports= service;
