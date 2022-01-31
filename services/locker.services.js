@@ -4,7 +4,8 @@ const db =require("../mongo");
 
 const service = {
     async unlock(req,res) {
-        const topic = req.body.topic;
+        const subscribe_topic = req.body.subscribe_topic;
+        const publish_topic = req.body.publish_topic;
         const key = req.body.key
         try {
             var client = mqtt.connect('mqtt://broker.emqx.io:1883', {
@@ -12,8 +13,8 @@ const service = {
             password:"public"
         });
 
-            var ssd1406topic = topic;
-            var ssd1306topic = `cli001ent/lo001cker/sta001tus`;
+            var ssd1406topic = publish_topic;
+            var ssd1306topic = subscribe_topic;
             
             console.log(ssd1406topic);
             client.on('connect',function(){
