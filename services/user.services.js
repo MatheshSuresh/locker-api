@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 const service = {
     async register(req,res) {
         try {
-            const user = await db.userauth.findOne({$or:[{email: req.body.email} , {username:req.body.username}]})
+            const user = await db.userauth.findOne({email: req.body.email})
             if(user)return res.status(400).send({error:"User already exist"})
             
             const salt= await bcrypt.genSalt(10);
@@ -23,7 +23,7 @@ const service = {
     
     async login(req,res){
         try {
-            const user = await db.userauth.findOne({username: req.body.username})
+            const user = await db.userauth.findOne({email: req.body.email})
             if(!user)return res.status(400).send({error:"User not exist"})
 
             const isValid=await bcrypt.compare(req.body.password,user.password);
@@ -35,7 +35,7 @@ const service = {
         } catch (error) {
             console.log("Error login User - ",error);
             res.status(500);
-        }
+        } 
     } 
 }
 

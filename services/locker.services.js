@@ -5,6 +5,7 @@ const db =require("../mongo");
 const service = {
     async unlock(req,res) {
         const topic = req.body.topic;
+        const key = req.body.key
         try {
             var client = mqtt.connect('mqtt://broker.emqx.io:1883', {
             username:'emqx',
@@ -12,18 +13,18 @@ const service = {
         });
 
             var ssd1406topic = topic;
-            var ssd1306topic = `${client.options.username}/locker/ssd1306`;
+            var ssd1306topic = `cli001ent/lo001cker/sta001tus`;
             
-            console.log(ssd1406topic)
+            console.log(ssd1406topic);
             client.on('connect',function(){
                 console.log('connected');
 
+                client.subscribe(ssd1306topic,function(err){
 
-                client.subscribe(ssd1406topic,function(err){
                 if(!err){
                     console.log('subscribed');
 
-                     client.publish(ssd1406topic,"unlocked1");
+                     client.publish(ssd1406topic,key);
                      res.status(200);
                 }
                 
