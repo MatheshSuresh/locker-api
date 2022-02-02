@@ -35,6 +35,9 @@ const jwt = require('jsonwebtoken');
     //  });
 
     app.use("/locker",lockerRoute);
+      
+    app.get('/', (req, res) => {res.send("Response From Backend")})
+
 
     const port =process.env.PORT||3001
     app.listen(port,()=>{
