@@ -75,6 +75,15 @@ const service = {
         }catch(err){
           res.status(500)
         }
+    },
+
+    async createPasscode(req,res){
+        try{
+            const data = await db.userauth.findOneAndUpdate({ email: req.body.email }, { $set: { passcode: req.body.passcode } })
+              res.send(data)
+          }catch(err){
+            res.status(500)
+          }
     }
 }
 
