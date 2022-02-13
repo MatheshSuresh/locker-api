@@ -57,7 +57,25 @@ const service = {
         } catch (err) {
           res.status(500)
         }
-      }
+      },
+    
+      async viewall(req, res){
+          try{
+            const data = await db.userauth.find().toArray()
+              res.send(data)
+          }catch(err){
+            res.status(500)
+          }
+      },
+
+      async view(req, res){
+        try{
+          const data = await db.userauth.find({email: req.body.email}).toArray()
+            res.send(data)
+        }catch(err){
+          res.status(500)
+        }
+    }
 }
 
 module.exports = service;

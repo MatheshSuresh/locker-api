@@ -72,6 +72,16 @@ const service = {
     } catch (err) {
       res.status(500)
     }
+  },
+
+  async Occupied(req, res){
+    try{
+      const data = await db.lockerData.find({user: { $exists: true, $ne: null }}).toArray();
+      var count = data.length
+      res.status(200).send(data);
+    }catch(e){
+      res.status(500)
+    }
   }
 }
 

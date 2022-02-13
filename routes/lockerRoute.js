@@ -5,5 +5,6 @@ route.post("/insertlocker", service.newLocker);
 route.post("/unlock", service.unlock);
 route.get("/lockerdata", service.lockerdata);
 route.post("/unlockupdate", service.Updatedata)
+route.get("/occupied", service.Occupied)
 
 module.exports = route;
