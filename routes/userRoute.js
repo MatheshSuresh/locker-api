@@ -7,6 +7,6 @@ route.post('/login',service.login)
 route.get('/check',service.check)
 route.post('/update',service.update)
 route.get('/viewall',service.viewall)
-route.get('/view',service.view)
+route.post('/view',service.view)
 route.post('/createpasscode',service.createPasscode)
 module.exports = route;
