@@ -5,6 +5,7 @@ module.exports ={
     db:null,
     userauth:null,
     lockerData:null,
+    logdata:null,
 
     async connect(){
         await client.connect();
@@ -14,6 +15,7 @@ module.exports ={
 
         this.userauth=this.db.collection("userauth");
         this.lockerData=this.db.collection("lockerData");
+        this.logdata=this.db.collection("logdata");
 
     }
 }

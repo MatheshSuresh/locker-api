@@ -1,5 +1,6 @@
 var mqtt = require('mqtt');
 const db = require("../mongo");
+const moment = require('moment')
 
 
 const service = {
@@ -35,6 +36,7 @@ const service = {
         console.log(message.toString());
         const status = message.toString();
         db.lockerData.findOneAndUpdate({ name: req.body.name }, { $set: { status: status } });
+        const updatetime = momentupdate(req.body.nam)
       })
       res.end();
     } catch (error) {
@@ -67,6 +69,7 @@ const service = {
     var status = "open"
     try {
       const data = await db.lockerData.findOneAndUpdate({ name: req.body.name }, { $set: { status: status } });
+      const updatetime = momentupdate(req.body.name)
       res.status(200).send(data);
 
     } catch (err) {
@@ -74,15 +77,46 @@ const service = {
     }
   },
 
-  async Occupied(req, res){
-    try{
-      const data = await db.lockerData.find({user: { $exists: true, $ne: null }}).toArray();
-      var count = data.length
+  async Occupied(req, res) {
+    try {
+      const data = await db.lockerData.find({ user: { $exists: true, $ne: null } }).toArray();
       res.status(200).send(data);
-    }catch(e){
+    } catch (e) {
+      res.status(500)
+    }
+  },
+
+  async Updateuser(req, res) {
+    try {
+      const data = await db.lockerData.findOneAndUpdate({ name: req.body.name }, { $set: { user: req.body.user } });
+
+      res.status(200).send(data);
+
+    } catch (err) {
+      res.status(500)
+    }
+  },
+  async logdata(req, res) {
+    try {
+      const data = await db.logdata.find().toArray();
+      res.status(200).send(data);
+
+    } catch (err) {
       res.status(500)
     }
   }
 }
+
+momentupdate = async (name) => {
+  var notification = new Promise(async(resolve, reject) => {
+    var data = {
+      time: moment().format('YYYY-MM-DD, h:mm:ss a'),
+      name: name
+    }
+    await db.logdata.insertOne(data);
+  })
+  return await notification
+}
+
 
 module.exports = service;
