@@ -88,7 +88,7 @@ const service = {
 
   async Updateuser(req, res) {
     try {
-      const data = await db.lockerData.findOneAndUpdate({ name: req.body.name }, { $set: { user: req.body.user } });
+      const data = await db.lockerData.findOneAndUpdate({ name: req.body.name }, { $set: { user: req.body.user, userstatus: req.body.userstatus } });
 
       res.status(200).send(data);
 
@@ -108,7 +108,7 @@ const service = {
 }
 
 momentupdate = async (name) => {
-  var notification = new Promise(async(resolve, reject) => {
+  var notification = new Promise(async (resolve, reject) => {
     var data = {
       time: moment().format('YYYY-MM-DD, h:mm:ss a'),
       name: name
