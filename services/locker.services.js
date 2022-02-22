@@ -106,6 +106,16 @@ const service = {
       res.status(500)
     }
   },
+  async deletedata(req, res) {
+    try {
+      const data = await db.lockerData.deleteOne({ "name": req.body.name })
+
+      res.status(200).send(data);
+
+    } catch (err) {
+      res.status(500)
+    }
+  },
   async logdata(req, res) {
     try {
       const data = await db.logdata.find().toArray();

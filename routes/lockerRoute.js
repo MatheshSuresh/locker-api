@@ -9,6 +9,6 @@ route.get("/occupied", service.Occupied)
 route.post("/updateuser", service.Updateuser)
 route.post("/updatealldata", service.Updatealldata)
 route.get("/logdata", service.logdata)
-
+route.post("/deletedata", service.deletedata)
 
 module.exports = route;
