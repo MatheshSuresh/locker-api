@@ -96,6 +96,16 @@ const service = {
       res.status(500)
     }
   },
+  async Updatealldata(req, res) {
+    try {
+      const data = await db.lockerData.updateMany({ name: req.body.name }, { $set: req.body });
+
+      res.status(200).send(data);
+
+    } catch (err) {
+      res.status(500)
+    }
+  },
   async logdata(req, res) {
     try {
       const data = await db.logdata.find().toArray();
