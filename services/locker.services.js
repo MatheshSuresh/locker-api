@@ -124,6 +124,15 @@ const service = {
     } catch (err) {
       res.status(500)
     }
+  },
+  async logdataone(req, res) {
+    try {
+      const data = await db.logdata.findOne({ name: req.body.name })
+      res.status(200).send(data);
+
+    } catch (err) {
+      res.status(500)
+    }
   }
 }
 
