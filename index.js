@@ -6,7 +6,7 @@ const lockerRoute = require("./routes/lockerRoute")
 const cors= require('cors');
 const mongo = require('./mongo');
 const jwt = require('jsonwebtoken');
-
+const ConnectionHandler = require('./connHandler');
 
  (async () =>{
      try{
@@ -37,7 +37,21 @@ const jwt = require('jsonwebtoken');
     app.use("/locker",lockerRoute);
       
     app.get('/', (req, res) => {res.send("Response From Backend")})
-
+	app.get('/machineStatus', (req, res) => {
+    const { ip, port, type, address } = req.query;
+    switch (type) {
+        case "status":
+            ConnectionHandler.Status(ip, port, address, (d) => {
+                res.send(d ? d: 503);
+            });
+            break;
+        case "operate":
+            ConnectionHandler.Open(ip, port, address, (d) => {
+                res.sendStatus(d ? 200: 503);
+            });
+            break;
+    }
+})
 
     const port =process.env.PORT||3001
     app.listen(port,()=>{

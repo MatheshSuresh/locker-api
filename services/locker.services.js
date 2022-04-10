@@ -66,9 +66,12 @@ const service = {
   },
 
   async Updatedata(req, res) {
-    var status = "open"
+    var status = "close"
     try {
-      const data = await db.lockerData.findOneAndUpdate({ name: req.body.name }, { $set: { status: status } });
+      const data = await db.lockerData.findOneAndUpdate({ name: req.body.name }, { $set: { status: status } },{new: true});
+      
+
+      console.log(data);
       const updatetime = momentupdate(req.body.name)
       res.status(200).send(data);
 
