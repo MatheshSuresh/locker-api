@@ -1,14 +1,13 @@
 const NET = require('net');
+const { Duplex } = require('stream');
 
 class ConnectionHandler {
 
-    static get StatusCode()
-    {
+    static get StatusCode() {
         return "30";
     }
 
-    static get OpenCode()
-    {
+    static get OpenCode() {
         return "31";
     }
 
@@ -20,67 +19,75 @@ class ConnectionHandler {
         return ConnectionHandler.HEXtoASCII("03");
     }
 
-    static Open(ip, port, address, callback)
-    {
-        try
-        {
+    static Open(ip, port, address, callback) {
+        try {
             let boardAddress = parseInt(address) - 1;
             let lockAddress = 53 + parseInt(address);
-            ConnectionHandler.write(ip, port, boardAddress, lockAddress, ConnectionHandler.OpenCode, ()=>callback(true), true);
-            
+            ConnectionHandler.write(boardAddress,ip, port, boardAddress, lockAddress, ConnectionHandler.OpenCode, () => callback(true), true);
+
         }
-        catch(err)
-        {
+        catch (err) {
             callback(false);
         }
     }
 
-    static Status(ip, port, address, callback)
-    {
-        try
-        {
-            // let boardAddress = parseInt(address) - 1;
-            let lockAddress = 53;
-            ConnectionHandler.write(ip, port, 0, lockAddress, ConnectionHandler.StatusCode, (d)=>{
+    static Status(ip, port, address, callback) {
+        try {
+            let board = parseInt(address) - 1;
+            let boardAddress = (board) * 16;
+            let lockAddress = 53 + boardAddress;
+            console.log(board + "0");
+            ConnectionHandler.write(board,ip, port, boardAddress, lockAddress, ConnectionHandler.StatusCode, (d) => {
                 callback(d);
             });
         }
-        catch(err)
-        {
+        catch (err) {
+            console.log(err);
             callback(false);
         }
     }
 
-    static write(host, port, boardAddress, address, data, callback, ignoreResponse) {
+    static write(board,host, port, boardAddress, address, data, callback, ignoreResponse) {
+        if (ConnectionHandler.IsRunning) {
+            callback(false);
+            return;
+        }
+        ConnectionHandler.IsRunning = true;
         let client = new NET.Socket();
         client.connect(port, host, () => {
-                client.on('data', (data) => {
-                    if(!data) callback(false);
-                    let resArr = [];
-                    let firstBit = data[3].toString(2).padStart(8, '0');
-                    let secondBit = data[4].toString(2).padStart(8, '0');
-                    for(let i = 7;i >= 0; i--) resArr.push(firstBit[i] == "1" ? 0 : 1);
-                    for(let i = 7;i >= 0; i--) resArr.push(secondBit[i] == "1" ? 0 : 1);
-                    callback(resArr);
-                    client.destroy();
-                });
+            client.on('data', (data) => {
+                console.log(data);
+                if (!data) callback(false);
+                let resArr = [];
+                let firstBit = data[3].toString(2).padStart(8, '0');
+                let secondBit = data[4].toString(2).padStart(8, '0');
+                var index = 0
+                board == 1?index = 17:index = 1
+                for (let i = 7; i >= 0; i--) resArr.push(firstBit[i] == "1" ? {status:0,id:index++,locker_address:index++} :{status:1,id:index++,locker_address:index++});
+                for (let i = 7; i >= 0; i--) resArr.push(secondBit[i] == "1" ?  {status:0,id:index++,locker_address:index++} :{status:1,id:index++,locker_address:index++});
+                callback(resArr);
+                client.destroy();
+                ConnectionHandler.IsRunning = false;
+            });
             let rawData = ConnectionHandler.PrefixASCII +
-                          ConnectionHandler.DecimalToASCII(boardAddress) + 
-                          ConnectionHandler.HEXtoASCII(data) + 
-                          ConnectionHandler.SuffixASCII + 
-                          ConnectionHandler.DecimalToASCII(address);
-            client.write(rawData + "\n");
-            if (ignoreResponse) {
-                setTimeout(()=>{
-                    client.destroy();
-                    callback(true)
-                }, 1000);
-            }
+                ConnectionHandler.DecimalToASCII(boardAddress) +
+                ConnectionHandler.HEXtoASCII(data) +
+                ConnectionHandler.SuffixASCII +
+                ConnectionHandler.DecimalToASCII(address);
+            client.write(rawData);
+            setTimeout(() => {
+                try
+                {
+                client.destroy();
+                callback(ignoreResponse);
+                ConnectionHandler.IsRunning = false;
+                }
+                catch(err){}
+            }, ignoreResponse ? 1000 : 3000);
         });
     }
-    
-    static DecimalToASCII(data)
-    {
+
+    static DecimalToASCII(data) {
         return ConnectionHandler.HEXtoASCII(parseInt(data, 10).toString(16));
     }
 

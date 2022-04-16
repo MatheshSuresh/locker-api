@@ -6,7 +6,8 @@ const service = {
     async register(req, res) {
         try {
             const user = await db.userauth.findOne({ email: req.body.email })
-            if (user) return res.status(400).send({ error: "User already exist" })
+            // if (user) return res.status(400).send({ message: "User already exist" })
+            if (user) return res.send({ message: "User already exist" })
 
             const salt = await bcrypt.genSalt(10);
             req.body.password = await bcrypt.hash(req.body.password, salt);
@@ -24,10 +25,10 @@ const service = {
     async login(req, res) {
         try {
             const user = await db.userauth.findOne({ email: req.body.email })
-            if (!user) return res.status(400).send({ error: "User not exist" })
+            if (!user) return res.send({ error: "User not exist" })
 
             const isValid = await bcrypt.compare(req.body.password, user.password);
-            if (!isValid) return res.status(403).send({ error: "Email or Password Not Exist" })
+            if (!isValid) return res.send({ error: "Email or Password Not Exist" })
 
             const token = jwt.sign({ userId: user._id, email: user.email }, process.env.authpass, { expiresIn: '2h' })
             res.header('auth', token).send(token);
