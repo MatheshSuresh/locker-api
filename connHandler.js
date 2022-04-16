@@ -62,9 +62,11 @@ class ConnectionHandler {
                 let firstBit = data[3].toString(2).padStart(8, '0');
                 let secondBit = data[4].toString(2).padStart(8, '0');
                 var index = 0
+                var address = 0
                 board == 1?index = 17:index = 1
-                for (let i = 7; i >= 0; i--) resArr.push(firstBit[i] == "1" ? {status:0,id:index++,locker_address:index++} :{status:1,id:index++,locker_address:index++});
-                for (let i = 7; i >= 0; i--) resArr.push(secondBit[i] == "1" ?  {status:0,id:index++,locker_address:index++} :{status:1,id:index++,locker_address:index++});
+                board == 1?address = 17:address = 1
+                for (let i = 7; i >= 0; i--) resArr.push(firstBit[i] == "1" ? {status:0,id:index++,locker_address:address++} :{status:1,id:index++,locker_address:address++});
+                for (let i = 7; i >= 0; i--) resArr.push(secondBit[i] == "1" ?  {status:0,id:index++,locker_address:address++} :{status:1,id:index++,locker_address:address++});
                 callback(resArr);
                 client.destroy();
                 ConnectionHandler.IsRunning = false;
