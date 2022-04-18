@@ -37,7 +37,29 @@ const ConnectionHandler = require('./connHandler');
         app.use("/locker", lockerRoute);
 
         app.get('/', (req, res) => { res.send("Response From Backend") })
-        app.get('/machineStatus', (req, res) => {
+        app.get('/machineStatus1', (req, res) => {
+            const { ip, port, type, address } = req.query;
+            console.log(ip, port, type, address);
+            try {
+                switch (type) {
+                    case "status":
+                        ConnectionHandler.Status(ip, port, address, (d) => {
+                            if(d) res.send(d);
+                            else res.sendStatus(503);
+                        });
+                        break;
+                    case "operate":
+                        ConnectionHandler.Open(ip, port, address, (d) => {
+                            res.sendStatus(d ? 200 : 503);
+                        });
+                        break;
+                }
+            }
+            catch (err) {
+
+            }
+        })
+        app.get('/machineStatus2', (req, res) => {
             const { ip, port, type, address } = req.query;
             console.log(ip, port, type, address);
             try {
