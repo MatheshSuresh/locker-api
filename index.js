@@ -5,7 +5,10 @@ const userRoute = require("./routes/userRoute")
 const lockerRoute = require("./routes/lockerRoute")
 const cors = require('cors');
 const mongo = require('./mongo');
+const path = require("path")
 const jwt = require('jsonwebtoken');
+
+app.use("/download", express.static(path.join(__dirname + "/download")))
 const ConnectionHandler = require('./connHandler');
 
 (async () => {

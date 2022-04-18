@@ -1,6 +1,9 @@
 const db = require("../mongo");
 const bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken');
+const fs = require("fs")
+const util = require("util")
+const removeFile = util.promisify(fs.unlink)
 
 const service = {
   async register(req, res) {
@@ -104,6 +107,36 @@ const service = {
       res.status(500)
     }
   },
+  async export(req, res) {
+    try {
+      const report = await db.userauth.find().toArray()
+      var Excel = require('exceljs');
+      var workbook = new Excel.Workbook();
+      const url = await workbook.xlsx.readFile("./templates/Users.xlsx")
+        .then(async function () {
+          var worksheet = workbook.getWorksheet(1);
+          for (var i = 0; i < report.length; i++) {
+            var row = await worksheet.getRow(Number(9) + Number(i));
+            row.getCell(1).value = report[i].username;
+            row.getCell(2).value = report[i].email;
+            row.getCell(3).value = report[i].role;
+          }
+          row.commit();
+          const path = `download/Users${Date.now()}.xlsx`
+          await workbook.xlsx.writeFile(`${path}`);
+          const base64file = fs.readFileSync(path, { encoding: 'base64' })
+          const contentType = "data:@file/octet-stream;base64,"
+          const url = await `${process.env.SERVER_ORIGIN}/${path}`
+          return { url: `http://localhost:1000/${path}`, filepath: path, urlnew: `${path}`, filepath: path }
+        })
+      res.send(url.urlnew)
+      setTimeout(async () => { await removeFile(`${url.filepath}`) }, 2000)
+
+
+    } catch (err) {
+      res.status(500)
+    }
+  }
 }
 
 module.exports = service;

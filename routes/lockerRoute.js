@@ -11,5 +11,7 @@ route.post("/updatealldata", service.Updatealldata)
 route.get("/logdata", service.logdata)
 route.post("/logdatalocker", service.logdataone)
 route.post("/deletedata", service.deletedata)
+route.get("/export", service.export)
+
 
 module.exports = route;

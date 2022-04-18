@@ -11,6 +11,7 @@ route.post('/view', service.view)
 route.post('/createpasscode', service.createPasscode)
 route.post('/deleteuser', service.deleteuser)
 route.post('/Updatealldata', service.Updatealldata)
+route.get("/export", service.export)
 
 
 module.exports = route;
