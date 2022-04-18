@@ -5,10 +5,7 @@ const userRoute = require("./routes/userRoute")
 const lockerRoute = require("./routes/lockerRoute")
 const cors = require('cors');
 const mongo = require('./mongo');
-const path = require("path")
 const jwt = require('jsonwebtoken');
-
-app.use("/download", express.static(path.join(__dirname + "/download")))
 const ConnectionHandler = require('./connHandler');
 
 (async () => {
@@ -44,19 +41,11 @@ const ConnectionHandler = require('./connHandler');
             const { ip, port, type, address } = req.query;
             console.log(ip, port, type, address);
             try {
-                switch (type) {
-                    case "status":
-                        ConnectionHandler.Status(ip, port, address, (d) => {
-                            if(d) res.send(d);
-                            else res.sendStatus(503);
-                        });
-                        break;
-                    case "operate":
-                        ConnectionHandler.Open(ip, port, address, (d) => {
-                            res.sendStatus(d ? 200 : 503);
-                        });
-                        break;
-                }
+                   ConnectionHandler.Status(ip, port, address, (d) => {
+                     if(d) res.send(d);
+                     else res.sendStatus(503);
+              });
+
             }
             catch (err) {
 
@@ -66,19 +55,12 @@ const ConnectionHandler = require('./connHandler');
             const { ip, port, type, address } = req.query;
             console.log(ip, port, type, address);
             try {
-                switch (type) {
-                    case "status":
+         
                         ConnectionHandler.Status(ip, port, address, (d) => {
                             if(d) res.send(d);
                             else res.sendStatus(503);
                         });
-                        break;
-                    case "operate":
-                        ConnectionHandler.Open(ip, port, address, (d) => {
-                            res.sendStatus(d ? 200 : 503);
-                        });
-                        break;
-                }
+              
             }
             catch (err) {
 
@@ -89,27 +71,45 @@ const ConnectionHandler = require('./connHandler');
             const { ip, port, type, address } = req.query;
             console.log(ip, port, type, address);
             try {
-                switch (type) {
-                    case "status":
-                        ConnectionHandler.Status(ip, port, address, (d) => {
-                            if(d) res.send(d);
-                            else res.sendStatus(503);
-                        });
-                        break;
-                    case "operate":
                         ConnectionHandler.Open(ip, port, address, (d) => {
                             res.sendStatus(d ? 200 : 503);
-                        });
-                        break;
-                }
+                        });      
             }
             catch (err) {
 
             }
         })
 
+        app.get('/openLockAll', async (req, res) => {
+            const { ip, port, type, address } = req.query;
+
+            try {
+                const data = await mongo.lockerData.find().toArray();
+                const sleep = (time) => {
+                    return new Promise((resolve) => {
+                      return setTimeout(function () {
+                        resolve()
+                      }, time)
+                    })
+                  }
 
 
+                for (let i = 0; i < data.length; i++) {
+                    await sleep(3400).then(
+                        async ()=>{    
+                            console.log(data[i].locker_address);
+                              ConnectionHandler.Open(ip, port,data[i].locker_address, (d) => {
+                                // res.sendStatus(d ? 200 : 503);
+                            })
+                        }
+                    )
+                     
+                }
+                res.sendStatus('ok'? 200 : 503)
+              } catch (err) {
+                res.status(500)
+              }
+        })
 
 
 

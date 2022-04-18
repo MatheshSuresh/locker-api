@@ -1,9 +1,6 @@
 var mqtt = require('mqtt');
 const db = require("../mongo");
 const moment = require('moment')
-const fs = require("fs")
-const util = require("util")
-const removeFile = util.promisify(fs.unlink)
 
 
 const service = {
@@ -71,8 +68,8 @@ const service = {
   async Updatedata(req, res) {
     var status = "close"
     try {
-      const data = await db.lockerData.findOneAndUpdate({ name: req.body.name }, { $set: { status: status } }, { new: true });
-
+      const data = await db.lockerData.findOneAndUpdate({ name: req.body.name }, { $set: { status: status } },{new: true});
+      
 
       console.log(data);
       const updatetime = momentupdate(req.body.name)
@@ -139,50 +136,6 @@ const service = {
     } catch (err) {
       res.status(500)
     }
-  },
-  async export(req, res) {
-    try {
-      const Dashboarddata = await db.lockerData.find().toArray();
-      const loginfo = await db.logdata.find().toArray();
-      var report = []
-      for (var i = 0; i < loginfo.length; i++) {
-        for (var j = 0; j < Dashboarddata.length; j++) {
-          if (loginfo[i].name === Dashboarddata[j].name) {
-            report.push({
-              logdata: loginfo[i],
-              lockerdata: Dashboarddata[j]
-            })
-          }
-        }
-      }
-      var Excel = require('exceljs');
-      var workbook = new Excel.Workbook();
-      const url = await workbook.xlsx.readFile("./templates/Report.xlsx")
-        .then(async function () {
-          var worksheet = workbook.getWorksheet(1);
-          for (var i = 0; i < report.length; i++) {
-            var row = await worksheet.getRow(Number(9) + Number(i));
-            row.getCell(1).value = report[i].lockerdata.user;
-            row.getCell(2).value = report[i].logdata.name;
-            row.getCell(3).value = report[i].logdata.time;
-            row.getCell(4).value = report[i].lockerdata.status;
-            row.getCell(5).value = report[i].lockerdata.ip_address;
-            row.getCell(6).value = report[i].lockerdata.port_address;
-          }
-          row.commit();
-          const path = `download/Report${Date.now()}.xlsx`
-          await workbook.xlsx.writeFile(`${path}`);
-          const base64file = fs.readFileSync(path, { encoding: 'base64' })
-          const contentType = "data:@file/octet-stream;base64,"
-          const url = await `${process.env.SERVER_ORIGIN}/${path}`
-          return { url: `http://localhost:1000/${path}`, filepath: path, urlnew: `${path}`, filepath: path }
-        })
-      res.send(url.urlnew)
-      setTimeout(async () => { await removeFile(`${url.filepath}`) }, 2000)
-
-    } catch (err) {
-      res.status(500)
-    }
   }
 }
 
@@ -196,8 +149,6 @@ momentupdate = async (name) => {
   })
   return await notification
 }
-
-
 
 
 module.exports = service;
